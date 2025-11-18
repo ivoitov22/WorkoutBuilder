@@ -1,0 +1,568 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Workout Builder</title>
+	<style type="text/css">
+		body {
+		  font-family:Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
+		  padding: 10px;
+		  background-image: url("images/back3.png");
+  		  background-repeat: no-repeat;
+		}
+		.container {
+		  gap: 40px;
+		  padding: 25px;	  
+		}
+		.library, .canvas {
+		  width:800px;
+		  border: 1px solid black;
+		  padding: 10px;
+		  border-radius: 5px;
+		  background-color: white;
+		}
+		#lib_header, #canvas_header{
+			color:gray;
+		}
+		.exercise_search {
+		  padding: 6px;
+		  margin-top: 8px;
+		  font-size: 17px;
+		  border: 1px solid black;
+		  border-radius:20px;
+		}
+		.exercise_search:focus{
+			background-color:#D3D3D3;
+		}
+		.library{
+			background: linear-gradient(to bottom, white, #BCBCBC);
+			box-shadow: 6px 9px #999999;
+		}
+		.canvas{
+			background: linear-gradient(to bottom, white, beige);
+			border: 2px dashed black;
+			box-shadow: 6px 9px #999999;
+		}
+		.canvas:hover {
+		  border-color: #4CBF50;
+
+		}
+		.card_exercise{
+			padding:10px;
+			border: 1px solid black;
+			width:200px;
+			margin:5px;
+			border-radius:5px;
+			background-color:#FFCCFF;
+			list-style-type:none;
+			cursor:move;
+		}
+		.card_exercise:hover{
+			background-color:#FFE6FF;
+		}
+		.list_workout{
+			border: 1px dashed black;
+			width:600px;
+			align-self: center;
+		}
+		.list_workout:hover{
+			border-color: #4CBF50;
+			background-color:beige;
+		}
+		.card_exercise.dragging{
+			opacity:.5;
+		}
+		#edetail {
+			width: 400px;
+			height: 510px;
+			background: radial-gradient(circle at -8.9% 51.2%, rgb(255, 124, 0) 0%, rgb(255, 124, 0) 15.9%, rgb(255, 163, 77) 15.9%, rgb(255, 163, 77) 24.4%, rgb(19, 30, 37) 24.5%, rgb(19, 30, 37) 66%); /* copied this style from a website */
+			border-radius: 12px;
+			margin:5px;
+			border: 1px solid black;
+			padding: 18px;
+			text-align: center;
+			color:white;
+			position:absolute;
+			left:45px;
+			top:65px;
+		}
+
+		#eimage {
+			width: 300px;
+			height: auto;
+		}
+
+		#close{
+			box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+			background:linear-gradient(to bottom, #79bbff 5%, #378de5 100%);
+			background-color:#79bbff;
+			border-radius:6px;
+			border:1px solid #84bbf3;
+			display:inline-block;
+			cursor:pointer;
+			color:#ffffff;
+			font-family:Arial;
+			font-size:15px;
+			font-weight:bold;
+			padding:10px 26px;
+			text-decoration:none;
+			text-shadow:0px 1px 0px #528ecc;
+		}
+		#close:hover {
+			background:linear-gradient(to bottom, #378de5 5%, #79bbff 100%);
+			background-color:#378de5;
+		}
+		#close:active {
+			position:relative;
+			top:1px;
+		}
+		#enotes{
+			display: none; 
+			position: absolute;  
+			width: 200px; 
+			display: none;  
+			left: -100px;
+			top:250px;
+			height: 100px; 
+			border-radius: 5px; 
+			padding: 10px;
+		}
+		#contactForm {
+			width:400px;
+			height:250px;
+			font-family:Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
+			font-size:9pt;
+			font-weight:bold;
+			position:absolute;
+			top:250px;
+			left:-400px;
+			background-color: #DCAE96;
+			opacity:.95;
+			margin:0px;
+			z-index:110;
+		}
+
+		#contact span {
+			padding:0px;
+			margin:0px;
+			position:relative;
+			top: 2px;
+			rotate:30deg;
+		}
+
+		#contact {
+			font-family:Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif"
+			font-size:9pt;
+			font-weight:bold;
+			text-align:center;
+			padding-top:17px;
+			padding-bottom:0px;
+			padding-left:3px;
+			padding-right:3px;
+			position:absolute;
+			top:350px;
+			left:-42px;
+			border-radius:5px;
+			background-color: #FFC0CB; 
+			width:90px;
+			height:25px;
+			margin:0px;
+			z-index:100;
+		}
+
+		#contact:hover, #contact: focus {
+			background-color: rgb(177, 148, 108);
+			background-color: rgba(177, 148, 108, .90);
+			cursor: pointer;
+		}
+
+		#contact.fixed,
+		#contactForm.fixed {
+			position:fixed;	
+		}
+		.layout{
+			display: flex;              
+    		gap: 20px;
+			align-items: flex-start;
+		}
+		.rotate {
+		/* Firefox */
+		-moz-transform: rotate(-90deg);
+		/* Chrome, Safari */
+		-webkit-transform: rotate(-90deg); /* Microsoft */
+		-ms-transform: rotate (-90deg);
+		/* Opera */
+		-o-transform: rotate(-90deg); /* Internet Explorer */
+		}
+		@media screen and (max-width: 1500px) {
+			.library, .canvas {
+				width: 500px;
+			}
+			.list_workout{
+				width:400px;
+			}
+			.card_exercise{
+				width:150px;
+				height:15px;
+			}
+		}
+		@media screen and (max-width: 900px) {
+			.library, .canvas {
+				width: 375px;
+			}
+			.list_workout{
+				width:300px;
+			}
+			.layout{
+				display: flex;              
+				gap: 20px;
+				flex-direction: column;
+			}
+			.card_exercise{
+				width:125px;
+				height:10px;
+				font-size:10pt;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<a href="explain.html" style="font-family:Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';font-size:14pt;">Click here to see how each requirement is met for the project</a>
+	<div class="container">		
+		<div id="contact"><span>Feedback!</span></div>
+			<div id="contactForm">
+				<div id="contactClose" style="position:relative; text-align:center; width:15px; left:375px; top:5px;
+										border:1px solid black; padding:1px; color: black; cursor: pointer;">X</div> 
+				<div id="contactAddress" style="position:relative; width:325px; left:45px; top:5px; padding:1px; color: black;"> 
+					Please consider leaving
+					some feedback<br />&nbsp;<br />
+					so that we can improve the website!<br />
+					<textarea type="text" class="feedbackBox" style="height:100px; width:300px;"></textarea>
+				</div>
+			</div>
+		<div class="layout">
+			<section class="library">
+				<div id="lib_header">
+					<h1 style="width: 800px;">Library of Exercises</h1>
+					<input type="text" placeholder="Search..." class="exercise_search" style="opacity:.5;">
+				</div>
+					<ul class="list_exercises">
+						<li class="card_exercise" data-name="bench"   draggable="true">Bench Press</li>
+						<li class="card_exercise" data-name="cable"   draggable="true">Cable Flies</li>
+						<li class="card_exercise" data-name="squats"  draggable="true">Squats</li>
+						<li class="card_exercise" data-name="rdls"    draggable="true">RDLs</li>
+						<li class="card_exercise" data-name="jump"    draggable="true">Jump Rope</li>
+						<li class="card_exercise" data-name="lateral" draggable="true">Lateral Raise</li>
+						<li class="card_exercise" data-name="burpee"  draggable="true">Burpee</li>
+						<li class="card_exercise" data-name="row"     draggable="true">Row</li>
+						<li class="card_exercise" data-name="calf"    draggable="true">Calf Raise</li>
+					</ul>
+			</section>	
+			<section class="canvas">
+				<div id="canvas_header">
+					<h1 style="width:800px;">Your Workout</h1>
+					<p>Drag and drop an exercise to add it to your routine, you can also drag back an exercise to remove it from your routine. Double click an exercise to reveal some information about it.</p>
+				</div>
+					<ul class="list_workout">
+						<li class="empty" style="visibility:visible; display:block;">When you select exercises and/or drag and drop them, they will appear here as a full list for a workout.</li>
+					</ul>
+			</section>
+		</div>
+		<div id="edetail" style="display: none; position: fixed; z-index: 1000;">
+			<img id="eimage" alt="info" style="display: none; position: absolute; top: -100px;">
+			<textarea id="enotes" placeholder="Add your notes here..."></textarea>
+			<p id="edescription" style="display: none; position: absolute; bottom: -100px;"></p>
+			<button id="close" style="display: none; position: absolute; right: -100px;">Close</button>
+		</div>
+	</div>
+	
+	<script src="js/jquery-3.7.1.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+	<script type="text/javascript">
+		
+		///START SEARCH
+		$(".exercise_search").on("keyup", function () {   //listener, checks to see when a key is pressed and then goes into the rest of the code
+			
+			let searchTerm = $(this).val().toLowerCase(); //takes in the value that is pressed
+			//console.log(searchTerm);
+			
+			if (searchTerm == undefined || searchTerm == null || searchTerm == "") {
+				searchTerm = ""; 
+			}
+			
+			$(".card_exercise").each(function () {        //loops every single card_exercise div li class
+				let exerciseName = $(this).text().toLowerCase(); //stores all of the exercises so that they can be compared against
+				//console.log(exerciseName);
+				
+				if (exerciseName == undefined || exerciseName == null) {
+					exerciseName = "";
+				}
+				$(this).toggle(exerciseName.includes(searchTerm)); //toggle is used to show/hide the cards based on whether or not the .includes function returns true or false when compared to exerciseName and searchTerm
+			});
+		});
+		///END SEARCH
+		
+		///START DRAG
+		const draggables = document.querySelectorAll('.card_exercise'); //get all of the exercise cards
+		const containers = document.querySelectorAll('.list_workout, .list_exercises'); //get the two containers that are valid
+		
+		draggables.forEach(draggable =>{  //loop through all of the cards and add a eventlistener to see when dragging is starting
+			draggable.addEventListener('dragstart', () =>{
+				if (!draggable.classList.contains('dragging')) {
+					draggable.classList.add('dragging'); //add the class dragging to indicate that the class is currently being dragged
+				}
+			});
+		});
+		
+		draggables.forEach(draggable => { //loop through each card and add an eventlistener to see when the dragging has ended
+			draggable.addEventListener('dragend', () =>{ //
+				draggable.classList.remove('dragging'); //remove the class dragging to indicate that the card has been let go
+			});
+		});
+		
+		containers.forEach(container => {			  		//loop through the containers and add a listener that checks when something is being dragged over it 
+			container.addEventListener('dragover', (e) =>{
+				e.preventDefault();
+				const after = getDragElement(container, e.clientY); //this is used to add the ability to drag items over one another and/or pick where they are dragged to in the container
+				const draggable = document.querySelector('.dragging'); //get all of the elements that are currently being dragged i.e have the dragging class
+				if (draggable == null) {         						//check to make sure there's no error with what is being dragged like it being mixed with another element or in two places at once
+					console.log("No draggable element found.");  
+					return;
+				}
+				if(after == null){ 
+					container.appendChild(draggable);
+					if(checkCanvasText() == true){
+						//console.log("true");
+						document.querySelector('.empty').style.display = "none";
+					} else{
+						document.querySelector('.empty').style.display = "block";
+					}
+				} else{
+					container.insertBefore(draggable, after); //got this logic from a youtube video that taught how to make the items sortable when being dragged and dropped
+					if(checkCanvasText() == true){
+						//console.log("true");
+						document.querySelector('.empty').style.display = "none";
+					} else{
+						document.querySelector('.empty').style.display = "block";
+					}
+				}			
+			});
+		});
+				
+		function getDragElement(container, y) {		//this is used to add the ability to pick where the element is dragged to, also learned this logic from a youtube video/online
+			const canDragElements = [...container.querySelectorAll('.card_exercise:not(.dragging)')];
+			
+			return canDragElements.reduce((close, child) => { 
+				const box = child.getBoundingClientRect();
+				const offset = y - box.top - box.height / 2;
+				if(offset<0 && offset > close.offset){
+					return { offset: offset, element: child }
+				}
+				else{
+					return close;
+				}
+			}, { offset: Number.NEGATIVE_INFINITY }).element;	
+		}
+		
+		function checkCanvasText() {										//checks to see if something
+			if ($('.list_workout').children('.card_exercise').length > 0) {
+				return true;  
+			} else {
+				return false; 
+			}
+		}
+		///END DRAG
+		
+		///BIO MOVE IN AND OUT START
+		var selected = 0;
+		var current = 0;
+		var ispress = false;
+		$(document).ready(function () {
+			const exdetails = {
+				bench: {
+					img: 'images/Bench_Press.jpg',
+					desc: 'The bench press is an activity that works your chest, and is done by lifting the barbell and pushing it off from your chest from a laying position.',
+				},
+				cable: {
+					img: 'images/Cable_Flies.jpg',
+					desc: 'Cable flies are an exercise during whcih you take two cables and pull them towards your chest while standing in a lunge position.',
+				},
+				squats: {
+					img: 'images/Squats.jpg',
+					desc: 'Squats are when you typically place the barbell on your back and let it rest on your shoulders, then you move your quads down and push up with your legs to get back to a standing position.',
+				},
+				rdls: {
+						img: 'images/RDL.jpg',
+						desc: 'RDLs or Romanian Deadlifts are an exercise in which you perform a regular deadlift, except you dont do drop the barbell at the end of the lift, you keep it off the ground and keep doing more consecutive lifts .',
+					},
+				jump: {
+						img: 'images/Jump_Rope.jpg',
+						desc: 'Jump roping is when you take a device called a jump rope, put one handle in each hand and swing it over your head and jump when it is about to take your feet out.',
+					},
+				lateral: {
+						img: 'images/Lateral_Raise.jpg',
+						desc: 'Lateral raises are typically performed with a dumbell, and involve the raising of the dumbell to the side of your body while maintaining a balance with the opposite arm.',
+					},
+				burpee: {
+						img: 'images/Burpee.jpg',
+						desc: 'The Burpee is when you start standing, then drop to a push-up position, do a push-up then go to a mountain-climber position and jump up, and repeat.',
+					},
+				row: {
+						img: 'images/Cable_Row.jpg',
+						desc: 'A row is when you are typically seated, and grab a parbell or the handles on a machine and pull towards yourself to your chest.',
+					},
+				calf: {
+						img: 'images/Calf_Raise.jpg',
+						desc: 'Calf raises are tpically done on a calf raising machine, on which you propel yourself up with only the use of your calves, and then go back down and repeat.',
+					},
+			};
+			$('.card_exercise').dblclick(function () { //double click card
+				const exname = $(this).data('name'); //get the exercise that is clicked
+				const details = exdetails[exname]; //set the details of the card that will be fading in
+				
+				$('#eimage').attr('src', details.img).fadeIn().animate({ top: '20px', right:'50px' }, 500); //fade the image in
+				$('#enotes').fadeIn().animate({left:'170px'}, 500);
+				$('#edescription') //fade the description in
+					.text(details.desc)
+					.fadeIn()
+					.animate({ bottom: '50px', right:'5px' }, 500);
+				$('#close').fadeIn().animate({ right: '170px', top:'495px' }, 500); //fade the close button in
+				
+				$('#edetail').fadeIn(); //show the actual card
+			});
+
+			$('#close').click(function () {
+				$('#eimage')
+					.animate({ top: '-100px' }, 500, function () {
+						$(this).fadeOut();
+					});
+				$('#edescription')
+					.animate({ bottom: '-100px' }, 500, function () {
+						$(this).fadeOut();
+					});
+				$('#enotes')
+					.animate({ left: '-100px'}, 500, function (){
+						$(this).fadeOut();
+					});
+				$(this).animate({ right: '-100px' }, 500, function () {
+					$(this).fadeOut();
+				});
+
+				setTimeout(() => {
+					$('#edetail').fadeOut();
+				}, 500);
+			});
+		});
+		///BIO MOVE IN AND OUT END
+		///EXTRA FOUR HOVERS START
+		$(".card_exercise").hover(function () { //when you hover over the card it scales a little bit to make it pop/make it easier to read
+				$(this).css({
+					transform: "scale(1.1)",
+					transition: "transform 0.4s ease-in-out", //ease into the scaling so that it doesnt just instantly pop out, makes it nicer to look at
+				});
+			    },
+			  function () {
+				$(this).css("transform", ""); //remove the scaling
+			}
+		);
+		$(".card_exercise").hover(   //when you hover over a card it gets some box shadow to make it pop
+		function () {
+			$(this).css("box-shadow", "0 3px 8px rgba(0, 0, 0, 0.5)");
+		},
+		function () {
+			$(this).css("box-shadow", "");  //remove it after stopping the hover
+		}
+		);
+		$(".exercise_search").hover(   //when you hover over a card it gets some box shadow to make it pop
+			function () {
+				$(this).animate({"opacity": 1});
+			},
+			function () {
+				$(this).animate({"opacity": .5});  //remove it after stopping the hover
+			}
+		);
+		$("#close").hover(function () { //when you hover over the card it scales a little bit to make it pop/make it easier to read
+				$(this).css({
+					transform: "scale(1.05)",
+					transition: "transform 0.4s ease-in-out", //ease into the scaling so that it doesnt just instantly pop out, makes it nicer to look at
+				});
+			    },
+			  function () {
+				$(this).css("transform", ""); //remove the scaling
+			}
+		);
+		///EXTRA FOUR HOVERS END
+		///EXTRA ONE MOVEMENT FOR REQUIREMENT
+		$("#contact").addClass("rotate");
+		$(window).scroll (function (event) { 
+			$("#contact").addClass("fixed");
+		}); 
+		var isShowing = 1;				  
+
+		$("#contact").addClass("rotate"); 
+
+		var ie = $.browser == "msie" && $.browser.version < 7;
+		
+		if(!ie){
+			$(window).scroll (function(event) {
+				$("#contact").addClass("fixed");
+			}); 
+		} 
+		$("#contact").click(function(e){ 
+			e.preventDefault();
+
+		if( isShowing%2 )
+		{
+			//executes every time is Showing is an odd number 
+			//bring the div onto the screen, into view
+			$("#contact").animate({
+				left: "+=400"
+			}, 700);
+			$("#contactForm").animate({
+				left:"+=400"
+			}, 700);
+			$("#contact").addClass("fixed"); 
+			$("#contactForm").addClass("fixed");
+			
+			$("#contact").css("background-color","#FFC0CB");
+					
+			isShowing++; //add 1 to isShowing: isShowing = isShowing + 1
+		}
+		else
+		{
+			//executes every time is Showing is an even number 
+			//move it off of the screen, out of view
+			$("#contact").animate({
+				left:"-=400"
+			}, 700);
+			$("#contactForm").animate({
+				left:"-=400"
+			}, 700);
+			
+			$("#contact").css("background-color","#FFC0CB");
+			
+			isShowing++; //add 1 to isShowing: isShowing = isShowing + 1
+		} //end if else for the modulus operator
+		
+	}); //end contact click	
+
+	//when the X is clicked 
+	$("#contactClose").click(function(e) {
+		e.preventDefault();
+		$("#contact").animate({ 
+			left:"-=400"
+		}, 700);
+		$("#contactForm").animate({
+			left:"-=400"
+		}, 700);
+		
+		$("#contact").css("background-color","#FFC0CB");
+	
+		isShowing++; //add 1 to isShowing: isShowing isShowing + 1
+	
+	}); //end close X click
+		</script>
+</body>
+	
+</html>
